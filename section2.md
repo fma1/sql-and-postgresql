@@ -50,3 +50,29 @@ WHERE
 ### Exercise - Trying Calculations in Where Clauses
 
 * Write a query that will print the `name` and `total_revenue` of all phones with a `total_revenue` greater than 1,000,000 (remember that `total_revenue` isn't an actual column in the table; you have to create it from `price` and `units_sold`) 
+
+### Updating Rows
+
+```sql
+UPDATE cities SET population = 39505000 WHERE name = 'Tokyo';
+```
+
+Need to be careful to update the row(s) you mean to update. Foolproof solution will be shown later on.
+
+### Deleting Rows
+
+```sql
+DELETE FROM cities WHERE name <> 'Tokyo';
+```
+
+### Exercise - Try Updating Records in a Table
+
+* You are going to write __two separate queries__
+* The __first__ query should update the `units_sold` of the phone with the name `NB` to `8543`
+* The __second__ query should select all rows and columns of the `phones` table
+
+### Exercise - Practice Deleting Records
+
+* You are going to write __two separate queries__.
+* The __first__ query should __delete__ all phones that were created by `Samsung`
+* The __second__ query should select all rows and columns of the `phones` table
