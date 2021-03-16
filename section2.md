@@ -1,4 +1,4 @@
-## Filtering Records
+## Section 2: Filtering Records
 
 ### Filtering Rows with "Where"
 

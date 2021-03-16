@@ -1,4 +1,4 @@
-## Working With Tables
+## Section 3: Working With Tables
 
 Note: Quizzes are not committed here.
 

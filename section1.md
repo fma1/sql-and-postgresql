@@ -1,4 +1,4 @@
-## Simple - But Powerful SQL Statements
+## Section 1: Simple - But Powerful SQL Statements
 
 Data taken from here:
 [https://en.wikipedia.org/wiki/List_of_largest_cities](https://en.wikipedia.org/wiki/List_of_largest_cities)
