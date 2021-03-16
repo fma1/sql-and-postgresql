@@ -205,3 +205,131 @@ VALUES ('Alex', 1), ('Lucia', 1), ('Ari', 2);
 -- Write query here to fetch all columns for all crew_members associated with the boat that has an ID of 1
 -- >>>>>>>> TODO #2 HERE!!!
 ```
+
+### Foreign Key Constraints Around Insertion
+
+In this video we will be talking about data consistency. In other words, it refers to the ability of our database to make sure that the information we are inserting into it makes sense and data lines up in some way.
+
+For example, take 3 scenarios:
+1. We insert a photo that is tied to a user that exists.
+2. We insert a photo that refers to a user that doesn't exist.
+3. We insert a photo that isn't tied to any user.
+
+For scenario #2, it would be this SQL:
+```sql
+INSERT INTO photos (url, user_id)
+VALUES ('http://jpg', 999);
+```
+
+Result:
+```
+insert or update on table "photos" violates foreign key constraint "photos_users_id_fkey"
+```
+
+It says we are trying to insert some record into the photos table but it is going to violate the foreign key constraint. This foreign key constraint means that Postgres wants to make sure that whenever we set up this foreign key, it tries to reference a record that actually exists inside of the users table.
+
+
+For scenario #3, it would be this SQL:
+```sql
+INSERT INTO photos (url, user_id)
+VALUES ('http://jpg', NULL);
+```
+
+`NULL` is special in Postgres. There's no value there. Nothing.
+
+Result:
+```
+INSERT successful
+```
+
+So for the 3 scenarios, these are the results:
+1. Everything works OK!
+2. An error!
+3. Put in a value of 'NULL' for `user_id`
+
+### Constraints Around Deletion
+
+What happens when we try to delete some records that involve a foreign key?
+
+A question. What happens if we delete the user with ID of 1? We would have some dangling references. These rows in photos are now trying to reference a user that does not exist. Remember, no ID ever gets reused so there will never be a new user with ID of 1. So in this scenario, we would need to add some code in our application to detect that we have some photos that aren't referencing any user that exists in the database. So when we use foreign keys, we can specify some options for exactly what we want to happen for what we want to happen whenever we try to delete a record that some other rows are dependent upon.
+
+There are 5 different options.
+
+1. `ON DELETE RESTRICT` -> Throw an error
+2. `ON DELETE NO ACTION` -> Throw an error
+3. `ON DELETE CASCADE` -> Delete the photo too!
+4. `ON DELETE SET NULL` -> Set the `user_id` of photo to `NULL`
+5. `ON DELETE SET DEFAULT` -> Set the `user_id` to a default value, if one is provided
+
+### Commands needed for next video to avoid copy-pasting
+
+```sql
+CREATE TABLE photos (
+  id SERIAL PRIMARY KEY,
+  url VARCHAR(200),
+  user_id INTEGER REFERENCES users(id)
+);
+ 
+INSERT INTO photos (url, user_id)
+VALUES
+  ('http:/one.jpg', 4),
+  ('http:/two.jpg', 1),
+  ('http:/25.jpg', 1),
+  ('http:/36.jpg', 1),
+  ('http:/754.jpg', 2),
+  ('http:/35.jpg', 3),
+  ('http:/256.jpg', 4);
+```
+
+### Testing Deletion Constraints
+
+To add one of the constraints, just add it to the `user_id` field when creating the photos table:
+`user_id INTEGER REFERENCES user(id) ON DELETE CASCADE`.
+
+### Setting Foreign Keys to Null on Delete
+
+`user_id INTEGER REFERENCES user(id) ON DELETE NULL`.
+
+### Adding Some Complexity
+
+At this point, we've taken a look at how to set up a database for a photo sharing app, but we've only got users and photos right now. We've seen some simple queries, and we've also had a look at maintaining data consistency by using those deletion constraints. So now we're going to add more complexity. I want to add this table called comments here, which is going to definitely have a relationship with users and photos.
+
+* We've seen how to set up relationships between tables
+* We've seen some _simple_ queries
+* We've seen how to clean up these relationships.
+
+__Now__:
+* Let's add in a `comments` table then figure out how to write a few super common queries
+
+photos table:
+```
+--------------------------
+|         photos         |
+--------------------------
+| id      | SERIAL       |
+| url     | VARCHAR(200) |
+| user_id | INTEGER      |
+--------------------------
+```
+
+users table:
+```
+--------------------------
+|          users         |
+--------------------------
+| id       | SERIAL      |
+| username | VARCHAR(40) |
+--------------------------
+```
+
+comments table:
+```
+---------------------------
+|        comments         |
+---------------------------
+| id       | SERIAL       |
+| photo_id | INTEGER      |
+| user_id  | INTEGER      |
+| content  | VARCHAR(240) |
+---------------------------
+```
