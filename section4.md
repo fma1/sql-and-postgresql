@@ -203,3 +203,128 @@ Then, `JOIN users` means somehow take all the rows in comments and match them in
 Anytime a join happens, you can imagine the database makes a temporary copy of the initial table (comments in this case). And then it changes the table name to "comments with users". It's then going to iterate through all the rows in the copied table and try to match them with rows in the users table using the matching statement with put on the other side of `ON`.
 
 This is our matching statement. This says for every row in the users table, take a look at the `id` column, and match that up with the row from the comments table using the `user_id` column of that table.
+
+### Another Quick Join
+
+__For each comment, list the contents of the comment and the URL of the photo the comment was added to.__
+
+```sql
+SELECT contents, url
+FROM comments 
+JOIN photos ON photos.id = comments.photo_id;
+```
+
+### Alternate Forms of Syntax
+
+__Notes on Joins__
+
+* Table order between `FROM` and `JOIN` _frequently_ make a difference
+* We must give context if column names collide
+* Tables can be renamed using the `AS` keyword
+* There are a few kind of joins
+
+Take the join from __Another Quick Join__, joining comments with photos. We are starting off with all the rows in comments and joining with photos. We could start off with all the rows in photos and join with comments. So in some cases, we can flip the order and it won't change the ultimate result. However, there are other scenarios where flipping the order will change the result. Now your initial question probably is, when does it make a difference? I will show you in the next video or two.
+
+Let's say we combined comments with photos together into one table. If we have two columns with the same column name, `id` in this scenario, we have to specify which table we're talking about when we reference `id`, otherwise we'll get an error `column reference "id" is ambiguous`. 
+
+Ambiguous:
+```sql
+SELECT id
+FROM photos
+JOIN comments ON photos.id = comments.photo_id;
+```
+
+Unambiguous:
+```sql
+SELECT id
+FROM photos
+JOIN comments ON photos.id = comments.photo_id;
+```
+
+Tables can be renamed:
+```sql
+SELECT comments.id AS comment_id, p.id as photo_id
+FROM photos AS p
+JOIN comments ON p.id = comments.photo_id;
+```
+
+### Missing Data in Joins
+
+__Show each photo url and the username of the poster__
+
+So if we imagine how we'd do this, we'd look at each row in the photos table, and match it up with the referenced user in the users table.
+
+```sql
+SELECT url, username
+FROM photos
+JOIN users ON users.id = photos.user_id
+```
+
+Now you should keep in mind that when we executed this query, every row in the photos table nicely lined up with a user in the users table. Now I'm going to throw a wrench into the works. I am going to insert a new row into the photos table.
+
+```sql
+INSERT INTO photos (url, user_id)
+VALUES ('https://banner.jpg', NULL);
+```
+
+Now I'm going to run the query again. Something interesting has happened. We do not see anything related to the photo we just added. So this query is not listing all photos, but only photos related to a user. Is this a problem? Yes, because again, it doesn't fulfill the original goal of our query.
+
+### Why Wasn't It Included
+
+So we can imagine we're creating a new table "photos with users" with columns `id`, `url`, `user_id`, `id`, `username` from both photos and users.
+
+So we add all the rows from the photos first. So now we match with the users in the users table and add those matching rows to the "photos with users" table alongside the added photo rows. But in this case, there is no matching row because `user_id` is `NULL`.
+
+Remember there are several different kinds of joins and the join we are using will drop a row from the new table if there is any row from our source table that does not match up with the target table. So because we could not find a match in the users table for that banner row, we don't see it in the final result.
+
+### Four Kinds of Joins
+
+We're going to walk through four kinds of joins:
+* Inner Join
+* Left Outer Join
+* Right Outer Join
+* Full Join
+
+```sql
+SELECT url, username
+FROM photos
+JOIN users ON users.id = photos.user_id
+```
+
+Whenever you see the `JOIN` keyword by itself in a query, that is by default an Inner Join. You can also write `INNER JOIN` in the query. As we walked through in the last video, we are going to walk through all rows in photos and match up each with rows with users. In Inner Joins, we only keep rows that match up to a row in the target table and drop rows that don't match.
+
+Now to visualize this, you'll see a Venn Diagram like this. The purple section shows that we only keep rows that have a perfect match between the two tables.
+
+__Left Outer Join__
+
+```sql
+SELECT url, username
+FROM photos
+LEFT JOIN users ON users.id = photos.user_id
+```
+
+So the keyword here is `LEFT JOIN` which indicates we are doing a Left Outer Join. Once again, take all rows from photos and do that matching process with users. Finally, we also do not have a match for the banner row. But in a Left Outer Join, we do not throw this row away. Instead if, we can't find a match for that, we backfill a row right here in place of a row from the users table with `NULL` values. If anything from the left photos table does not match up with the users table, we are going to keep it.
+
+Again, we are going to look at this Venn Diagram. We are going to hopefully match some stuff with the users table, but if we don't, that's fine.
+
+__Right Outer Join__
+
+```sql
+SELECT url, username
+FROM photos
+RIGHT JOIN users ON users.id = photos.user_id
+```
+
+This is pretty much the exact opposite of a Left Outer Join. Again, we are going to take all the rows from photos and try to match them up with the rows in the users. Any rows in photos that do not match up are dropped, but then we add any unmatched rows from users, and backfill the row in place of a row from photos.
+
+__Full Join__
+
+```sql
+SELECT url, username
+FROM photos
+FULL JOIN users ON users.id = photos.user_id
+```
+
+The last one we are going to look at is a Full Join. In a Full Join, give us everything, try to merge as many rows as possible.
+
+Once again, take all our different photo rows and put them down here in "photos with users table". Match them up with users in rows. Now we have this banner row so we set all relevant columns in users with `NULL`. In addition, we're going to include this user with `id` of 4 and set all relevant columns in photos with `NULL`.
