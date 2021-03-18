@@ -280,6 +280,7 @@ __Resulting Tables__
 | 2  | http://alayna.net  | 3       |
 | 3  | http://kailyn.name | 1       |
 | 4  | http://banner.jpg  | NULL    |
+-------------------------------------
 
 --------------------------
 |          users         |
@@ -290,6 +291,7 @@ __Resulting Tables__
 | 2  | Micah.Cremin      |
 | 3  | Alfredo66         |
 | 4  | Gerard_Mitchell42 |
+--------------------------
 
 ### Why Wasn't It Included
 
@@ -382,6 +384,7 @@ Result of Query 1:
 | 2  | https://alayna.net  | 3       | 3    | Alfredo66     |
 | 3  | https://kailyn.name | 1       | 1    | Reynah.Marvin |
 | 4  | https://banner.jpg  | NULL    | NULL | NULL          |
+-------------------------------------------------------------
 
 Result of Query 2:
 
@@ -394,6 +397,7 @@ Result of Query 2:
 | 2  | Micah.Cremin      | 1    | https://santiya.net | 2       |
 | 3  | Alfredo66         | 2    | https://alayna.net  | 3       |
 | 4  | Gerard_Mitchell42 | NULL | NULL                | NULL    |
+-----------------------------------------------------------------
 
 When we list out photos first, we ended up with a photo that does not have a corresponding user. When we swap the two and start off with users, we end up with a user that does not have corresponding photo. So yes, the answer is there is a difference whenever we use a RIGHT or LEFT OUTER JOIN. But with an INNER JOIN or a FULL JOIN, in general, it does not make a difference. Now having said that, there are some scenarios in which you would want to massage the order of tables, especially when you are joining multiple (3+) tables.
 
@@ -409,6 +413,7 @@ Write a query that will return the `title` of each book, along with the `name` o
 | 1  | Stephen King    |
 | 2  | Agatha Christie |
 | 3  | JK Rowling      |
+------------------------
 
 ----------------------------------------
 |                 books                |
@@ -418,6 +423,7 @@ Write a query that will return the `title` of each book, along with the `name` o
 | 1  | The Dark Tower      | 1         |
 | 2  | Affair At Styles    | 2         |
 | 3  | Murder at the Links | 2         |
+----------------------------------------
 
 ### Where with Join
 

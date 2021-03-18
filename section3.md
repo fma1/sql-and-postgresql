@@ -30,8 +30,8 @@ The other relationship we will consider is Many-to-Many. Students at a school pr
 
 ### Primary Keys and Foreign Keys
 
-photos table:
-```
+----------------------------------
+| photos |
 ----------------------------------
 | id | url             | user_id |
 |----|-----------------|---------|
@@ -40,10 +40,9 @@ photos table:
 | 3  | http://img3.jpg | 1       |
 | 4  | http://img4.jpg | 2       |
 ----------------------------------
-```
 
-users table:
-```
+-------------------------------------------
+| users |
 -------------------------------------------
 | id | username  | email                  |
 |----|-----------|------------------------|
@@ -52,7 +51,6 @@ users table:
 | 3  | 99stroman | blaze68@hotmail.com    |
 | 4  | sim3onis  | nedra1@yahoo.com       |
 -------------------------------------------
-```
 
 Every single table we're going to create is going to have a primary key. Up until now, we have not created any tables with a primary key. Moving forward, all tables we create will have a primary key. The goal of a primary key is to IDentify an individual row inside of a table. Every value in that column is going to be some sort of unique value in that column. So in the photo table, the first column has an ID of 1. There will never be any other row that has an ID of 1. So if go into this table and ask for the row with an ID of 1, I will always 100% get that row back.
 
@@ -301,8 +299,6 @@ At this point, we've taken a look at how to set up a database for a photo sharin
 __Now__:
 * Let's add in a `comments` table then figure out how to write a few super common queries
 
-photos table:
-```
 --------------------------
 |         photos         |
 --------------------------
@@ -310,20 +306,14 @@ photos table:
 | url     | VARCHAR(200) |
 | user_id | INTEGER      |
 --------------------------
-```
 
-users table:
-```
 --------------------------
 |          users         |
 --------------------------
 | id       | SERIAL      |
 | username | VARCHAR(40) |
 --------------------------
-```
 
-comments table:
-```
 ---------------------------
 |        comments         |
 ---------------------------
@@ -332,4 +322,3 @@ comments table:
 | user_id  | INTEGER      |
 | content  | VARCHAR(240) |
 ---------------------------
-```
