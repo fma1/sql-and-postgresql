@@ -280,7 +280,6 @@ __Resulting Tables__
 | 2  | http://alayna.net  | 3       |
 | 3  | http://kailyn.name | 1       |
 | 4  | http://banner.jpg  | NULL    |
--------------------------------------
 
 --------------------------
 |          users         |
@@ -413,7 +412,6 @@ Write a query that will return the `title` of each book, along with the `name` o
 | 1  | Stephen King    |
 | 2  | Agatha Christie |
 | 3  | JK Rowling      |
-------------------------
 
 ----------------------------------------
 |                 books                |

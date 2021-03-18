@@ -39,7 +39,6 @@ The other relationship we will consider is Many-to-Many. Students at a school pr
 | 2  | http://img2.jpg | 4       |
 | 3  | http://img3.jpg | 1       |
 | 4  | http://img4.jpg | 2       |
-----------------------------------
 
 -------------------------------------------
 | users |
@@ -299,9 +298,10 @@ At this point, we've taken a look at how to set up a database for a photo sharin
 __Now__:
 * Let's add in a `comments` table then figure out how to write a few super common queries
 
---------------------------
 |         photos         |
 --------------------------
+| Column  | Data Type    |
+|---------|--------------|
 | id      | SERIAL       |
 | url     | VARCHAR(200) |
 | user_id | INTEGER      |
@@ -310,6 +310,8 @@ __Now__:
 --------------------------
 |          users         |
 --------------------------
+| Column   | Data Type   |
+|----------|-------------|
 | id       | SERIAL      |
 | username | VARCHAR(40) |
 --------------------------
@@ -317,6 +319,8 @@ __Now__:
 ---------------------------
 |        comments         |
 ---------------------------
+| Column   | Data Type    |
+|----------|--------------|
 | id       | SERIAL       |
 | photo_id | INTEGER      |
 | user_id  | INTEGER      |
