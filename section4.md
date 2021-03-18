@@ -269,6 +269,28 @@ VALUES ('https://banner.jpg', NULL);
 
 Now I'm going to run the query again. Something interesting has happened. We do not see anything related to the photo we just added. So this query is not listing all photos, but only photos related to a user. Is this a problem? Yes, because again, it doesn't fulfill the original goal of our query.
 
+__Resulting Tables__
+
+-------------------------------------
+|              photos               |
+-------------------------------------
+| id | url                | user_id |
+|----|--------------------|---------|
+| 1  | http://santiya.net | 2       |
+| 2  | http://alayna.net  | 3       |
+| 3  | http://kailyn.name | 1       |
+| 4  | http://banner.jpg  | NULL    |
+
+--------------------------
+|          users         |
+--------------------------
+| id | username          |
+|----|-------------------|
+| 1  | Reynah.Marvin     |
+| 2  | Micah.Cremin      |
+| 3  | Alfredo66         |
+| 4  | Gerard_Mitchell42 |
+
 ### Why Wasn't It Included
 
 So we can imagine we're creating a new table "photos with users" with columns `id`, `url`, `user_id`, `id`, `username` from both photos and users.
@@ -328,3 +350,141 @@ FULL JOIN users ON users.id = photos.user_id
 The last one we are going to look at is a Full Join. In a Full Join, give us everything, try to merge as many rows as possible.
 
 Once again, take all our different photo rows and put them down here in "photos with users table". Match them up with users in rows. Now we have this banner row so we set all relevant columns in users with `NULL`. In addition, we're going to include this user with `id` of 4 and set all relevant columns in photos with `NULL`.
+
+### Does Order Matter?
+
+Note: See tables from Resulting Tables.
+
+The only difference between these 2 queries is the order of tables:
+
+```sql
+SELECT url, username
+FROM photos
+LEFT JOIN users ON users.id = photos.user_id
+```
+
+```sql
+SELECT url, username
+FROM users  
+LEFT JOIN photos ON users.id = photos.user_id
+```
+
+We'll start over here first. We would take all our different photos from the photos table. And then we'd match each row from the users table. And then finally, because the banner row doesn't match up, because it is a left join, we will backfill that row with `NULL`.
+
+Result of Query 1:
+
+-------------------------------------------------------------
+|                      photos with users                    |
+-------------------------------------------------------------
+| id | url                 | user_id | id   | username      |
+|----|---------------------|---------|------|---------------|
+| 1  | https://santiya.net | 2       | 2    | Micah.Cremin  |
+| 2  | https://alayna.net  | 3       | 3    | Alfredo66     |
+| 3  | https://kailyn.name | 1       | 1    | Reynah.Marvin |
+| 4  | https://banner.jpg  | NULL    | NULL | NULL          |
+
+Result of Query 2:
+
+-----------------------------------------------------------------
+|                       users with photos                       |
+-----------------------------------------------------------------
+| id | username          | id   | url                 | user_id |
+|----|-------------------|------|---------------------|---------|
+| 1  | Reynah.Marvin     | 3    | https://kailyn.name | 1       |
+| 2  | Micah.Cremin      | 1    | https://santiya.net | 2       |
+| 3  | Alfredo66         | 2    | https://alayna.net  | 3       |
+| 4  | Gerard_Mitchell42 | NULL | NULL                | NULL    |
+
+When we list out photos first, we ended up with a photo that does not have a corresponding user. When we swap the two and start off with users, we end up with a user that does not have corresponding photo. So yes, the answer is there is a difference whenever we use a RIGHT or LEFT OUTER JOIN. But with an INNER JOIN or a FULL JOIN, in general, it does not make a difference. Now having said that, there are some scenarios in which you would want to massage the order of tables, especially when you are joining multiple (3+) tables.
+
+### Exercise - Joins, Joins, Join!
+
+Write a query that will return the `title` of each book, along with the `name` of the author. All authors should be included, even if they do not have a book associated with them.
+
+------------------------
+|        authors       |
+------------------------
+| id | name            |
+|----|-----------------|
+| 1  | Stephen King    |
+| 2  | Agatha Christie |
+| 3  | JK Rowling      |
+
+----------------------------------------
+|                 books                |
+----------------------------------------
+| id | title               | author_id |
+|----|---------------------|-----------|
+| 1  | The Dark Tower      | 1         |
+| 2  | Affair At Styles    | 2         |
+| 3  | Murder at the Links | 2         |
+
+### Where with Join
+
+We've been talking about joins for a while now, but joins are really important for you to understand. So we've got to talk about joins a little more. We're going to start to take a look on variations on joins that are going to use some other SQL keywords.
+
+__Users can comment on photos that they posted. List the url and contents for every photo/comment where this occurred.__
+
+We are going to answer the question:
+__Who is commenting on their own photos?__
+
+So to do that, we can join the `comments` and `photos` table as normal to get a `comments with photos` table. We could then select `contents` and `url` from the `comments with photos` table. But that's not quite what we want. We want the contents and URL where the person who created the comment is also the person who created the photo. So to do this, we could find all the rows where the `user_id`b of the comment is equal to the `user_id` of the photo.
+
+```sql
+SELECT url, contents
+FROM comments
+JOIN photos ON photos.id = comments.photo_id;
+```
+
+So for now, let's just run that query to make sure it works and we get valid data. I'd say this looks reasonable. Now we're going to add in a `WHERE` expression to filter the rows.
+
+`WHERE` always go on the other side. I would always expect to see `FROM`, then `JOIN`, then `WHERE`. I wouldn't expect to see `WHERE` before `FROM`.
+
+```sql
+SELECT url, contents
+FROM comments
+JOIN photos ON photos.id = comments.photo_id
+WHERE comments.user_id = photos.user_id;
+```
+
+So this comparison right here is doing exactly what we saw. We're literally at these two columns. Comparing the value of each of them, and if they're equal inside our ResultSet, keep them, otherwise, drop them.
+
+Now, this is another scenario where you really need to remember that comparisons are being done for every single row in this imaginary `comments with photos` table.
+
+Now, I want to do something more complicated. We are only showing about the photo and comment now. But we don't know _which_ users are posting on their own photos.
+
+### Three-Way Joins
+
+We're going to alter this query so we not only post the URL of the photo, the contents of the comment but the username of the user who posted the comment and created the photo.
+
+So we're going to do a Three-Way Join. Now conceptually this is very very challenging, but the SQL ends up being simple and straightforward. So we need information from `comments`, `photos`, `users`.  
+
+So I have this imaginary table `comments with photos with users`.
+First we select all rows in comments. We can just join on photos and as usual match up with the rows in photos. Okay that's how far we've gotten in the past photos. So now we are saying, we now want to merge in this table.
+
+You have to really think about the merge condition in the `ON` statement. If we just match up `user_id` from comments with `id` from users, that will not necessarily give us what we want, the users who posted on their own photos. What we really want to see is when the comments `user_id` is equal to the photos `user_id` and equal to the `id` in the users table.
+
+For the first row, we have `user_id` of 2 for the comment and a `user_id` of 3 for the photo. So there is no user that created both the comment and the photo. So we would imagine we would get `NULL` for `id` and `username`. Now when I say we would get, I just mean logically. I'm not even worrying about SQL or anything like that.
+
+For the second row, we have a `user_id` of 5 for both the comment and the photo, so the `id` would be 5 and the `username` would  be `Frederique_Donally`.
+
+
+For the first row, we have `user_id` of 3 for the comment and a `user_id` of 2 for the photo. So again, there is no user that created both the comment and the photo. So we also get `NULL` filled in for that row.
+
+Now if we printed the table as-is, we would get some rows that say `NULL` for the username and we don't really want that. We only want the rows that have a user that matches the criteria. So we could do a `WHERE` expression, but alternatively, we could look at the 4 different kinds of joins. An Inner Join is only going to show us the rows where there is a matching value from all tables. So if we did a Three-Way Inner Join, these rows where there's no matching user would get dropped.
+
+```sql
+SELECT url, contents, username
+FROM comments
+JOIN photos ON photos.id = comments.photo_id
+JOIN users ON users.id = comments.user_id AND users.id = photos.user_id
+```
+
+So the key thing here is we're trying to find users or merge tables where the user's ID is equal to the comment's user ID and the user's ID is equal to the photo's user ID.
+
+Generally, the second `JOIN` is going to have a little bit more complicated merging expression because we need to really think about what rows go with whichever rows.
+
+### Exercise - Three Way Exercise
+
+Write a query that will return the `title` of each book, along with the `name` of the author and the `rating` of a review. Only show rows where the author of the book is the author of the review.
+
