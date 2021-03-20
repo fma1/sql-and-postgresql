@@ -135,7 +135,7 @@ SELECT user_id, COUNT(*) from photos;
 
 ### Exercise - Practice for Grouping and Aggregating
 
-Write a query that will print an author's id and the number of books they have authored.
+Write a query that will print an author's `id` and the number of books they have authored.
 
 Note: There is an `author` table but all information needed is in the `books` table.
 
@@ -148,3 +148,77 @@ Note: There is an `author` table but all information needed is in the `books` ta
 | 2  | Prisoner of Azkaban | 1         |
 | 3  | The Dark Tower      | 2         |
 | 4  | Murder at the Links | 3         |
+
+------------------------
+|        authors       |
+------------------------
+| id | name            |
+|----|-----------------|
+| 1  | JK Rowling      |
+| 2  | Stephen King    |
+| 3  | Agatha Christie |
+| 4  | Dr Seuss        |
+
+### Exercise - Grouping with a Join!
+
+Write a query that will print an author's `name` and the number of books they have authored.
+
+### filtering Groups with Having
+
+![SQL Keyword Order](/images/sqlkeywordorder.png)
+
+We've taken a look at a couple different keywords. And these keywords are always going to be in a specific order.
+
+The difference between `WHERE` and `HAVING` is `WHERE` filters some specific number of rows while `HAVING` filters some specific number of groups. `HAVING` will only appear with `GROUP BY`.
+
+Our goal is this:
+Find the number of comments for each photo __where__ the photo id is less than 3 __AND__ the photo has more than 2 comments.
+
+First we probably want to filter out all records with `photo_id` < 3. Afterwards we'd do a grouping step. So we have `photo_id`s of 1 and 2. So we have groups 2. Now we imagine we'd go through the `COUNT()` operation. Group 1 has 3. Group 2 has 1. Now we'd probably execute the `HAVING` clause.
+
+### Having in Action
+
+```sql
+SELECT photo_id, COUNT(*)
+FROM comments
+WHERE photo_id < 3
+GROUP BY photo_id
+HAVING COUNT(*) > 2
+```
+
+### More on Having
+
+Find the users (`user_id`) __where__ the user has commented on the first 2 photos __AND__ the user added at least 2 comments.
+
+So we're definitely looking at the `comments` table. I'd drop all rows that don't have a `photo_id` of 1 or 2. Now we're going to group all these rows together based on `user_id`. Assign rows based on `user_id`. Now we're going to count up the different rows in each group. We have 2 for Group 1, 1 for Group 2, 1 row for Group 3. And we're going to filter groups based on number of comments, which leaves Group 1. That's the idea. Now we're going to write the SQL.
+
+I'm going to change the query a bit to fit our dataset:
+Find the users (`user_id`) __where__ the user has commented on the first 50 photos __AND__ the user added more than 20 comments.
+
+```sql
+SELECT user_id, COUNT(*)
+FROM comments
+WHERE user_id <= 50 
+GROUP BY photo_id
+HAVING COUNT(*) > 20
+```
+
+### Exercise - Practice Yourself Some Having
+
+Given a table of `phones`, print the names of manufacturers and total revenue (`price` * ``units_sold`) for all phones. Only print the manufacturers who have revenue greater than 2,000,000 for all the phones they sold.
+
+Note: from the problem statement, it looks like you don't need to filter down any of the initial rows. That means you probably won't have to use the `WHERE` keyword.
+
+---------------------------------------------------
+|                       phones                    |
+---------------------------------------------------
+| name        | manufacturer | price | units_sold |
+---------------------------------------------------
+| N1280       | Nokia        | 199   | 1925       |
+| Iphone 4    | Apple        | 399   | 9436       |
+| Galaxy S    | Samsung      | 299   | 2359       |
+| S5620 Monte | Samsung      | 250   | 2385       |
+| N8          | Nokia        | 150   | 7543       |
+| Droid       | Motorola     | 150   | 8395       |
+| Wave S8500  | Samsung      | 175   | 9259       |
+
