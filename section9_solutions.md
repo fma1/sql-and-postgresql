@@ -18,3 +18,26 @@ FROM (
 ) AS p;
 ```
 
+### Solution - Subquery Where's
+
+```sql
+SELECT name, price
+FROM phones
+WHERE price > (
+    SELECT price
+    FROM phones
+    WHERE name = 'S5620 Monte'
+);
+```
+
+### Solution - Practice Your Subqueries!
+
+```sql
+SELECT name
+FROM phones
+WHERE price > ALL (
+    SELECT price
+    FROM phones
+    WHERE manufacturer = 'Samsung'
+);
+```

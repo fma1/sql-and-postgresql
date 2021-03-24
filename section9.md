@@ -259,3 +259,186 @@ ON o.user_id = users.id
 ```
 
 So now we can see all users that ordered a product with id of 3.
+
+### More useful - Subqueries with Where
+
+You'll find this quite more often than other subqueries. Now keep in mind there are a couple of operators that can be used with `WHERE`. A subquery is going to be valid or not, depending on the operator (=, >, <, `IN`, etc.).
+
+Let's take a look at this first example.
+
+Outer query:
+```
+SELECT id
+FROM orders
+WHERE product_id IN ___
+```
+
+Subquery:
+```
+SELECT id
+FROM products
+WHERE price / weight > 50;
+```
+
+Now we could solve this with a join. Sometimes it's easier to understand with a `WHERE`.
+
+Now you notice you're getting a single column of values. Then you can use it with the `IN` value. `IN` checks whether a value is present within a list of values.  
+
+We can imagine take a look at all different products. Discard all products price / weight < 5 (we changed the subquery to > 50 for the whole data set). So now we have ids 1-7, which are going to provided to the `WHERE` clause. And now the DB is going to go through row by row, and see whether the `product_id` is present within the list. So that is our final dataset there. Now the last thing is for the DB to select the columns, and we're just left with a list of `id`s for order.
+
+```
+SELECT id
+FROM orders
+WHERE product_id IN (
+  SELECT id FROM products WHERE price / weight > 50
+);
+```
+
+### Data Structure with Where Queries
+
+We learned last video that the operator is going to the influence the structure of data we're going to use with the `WHERE` clause.
+
+![Subquery Where Data Structure](images/subqueries_where_data_structure.png)
+
+So with that in mind let's try to write a subquery that will return a single value here:
+```sql
+SELECT name
+FROM products
+WHERE price > ___
+```
+
+The problem statement is __Show the name of all products with a price greater than the average product price__.
+
+```sql
+SELECT AVG(price)
+FROM products
+```
+
+So our average price is 498. And you notice we get a single value. So we can use this as our subquery.
+
+```sql
+SELECT name
+FROM products
+WHERE price > (
+  SELECT AVG(price)
+  FROM products
+);
+```
+
+### Exercise - Subquery Where's
+
+Write a query that prints out the name and price of phones that have a price greater than the Samsung S5620 Monte.
+
+For reference, here is the phones table:
+
+| name        | manufacturer | price | units_sold |
+|-------------|--------------|-------|------------|
+| N1280       | Nokia        | 199   | 1925       |
+| Iphone 4    | Apple        | 399   | 9436       |
+| Galaxy S    | Samsung      | 299   | 2359       |
+| S5620 Monte | Samsung      | 250   | 2385       |
+| N8          | Nokia        | 150   | 7543       |
+| Droid       | Motorola     | 150   | 8395       |
+| Wave S8500  | Samsung      | 175   | 9259       |
+
+### The Not In Operator With a List
+
+__Show the name of all products that are not in the same department as products with a price less than 100__.
+
+So first you should figure out which operator to use. In this case, it's in the problem. It's `NOT IN`. That means our subquery must return a single column. That contains the departments that have products with a price less than 100.
+
+Outer query:
+```sql
+SELECT name
+FROM products
+NOT IN ___;
+```
+
+Subquery:
+```
+SELECT department
+FROM products
+WHERE price < 100;
+```
+
+So now we're going to merge the results of these two queries together. Going to print out department too.
+
+```sql
+SELECT name, department
+FROM products
+NOT IN (
+  SELECT department FROM products WHERE price < 100
+);
+```
+
+### A New Where Clause
+
+We're going to making use of an operator we have not used.
+
+__Show the name, department, and price of products that are more expensive than all products in the 'Industrial' department.__
+
+First, we need to find all products in the Industrial department. So we have two rows with 327 and 796. Now we're going to look at all our rows and drop them ones than are greater than the prices in these two rows.
+
+One way we could solve this is using a `MAX(price)` aggregate function. For the purposes of this video, I'm going to use a different way.
+
+We're going to make use of the `> ALL` operator.
+
+```sql
+SELECT name, department, price
+FROM products
+WHERE price > ALL ___
+```
+
+```sql
+SELECT price
+FROM products
+WHERE name = 'Industrial';
+```
+
+```sql
+SELECT name, department, price
+FROM products
+WHERE price > ALL (
+  SELECT price
+  FROM products
+  WHERE name = 'Industrial'
+);
+
+### Finally Some!
+
+Let's imagine this.  
+
+`50 > SOME` -> `(20, 100)`  
+
+This checks that 50 is greater than at least one of the two values.
+
+If the greater than sign was reversed, we would check that 50 is less than at least one of the two values.
+```
+
+__Show the name of products that are more expensive than at least one product in the 'Industrial' department.__
+
+```sql
+SELECT name, department, price
+FROM products
+WHERE price > SOME (
+  SELECT price
+  FROM products
+  WHERE department = 'Industrial'
+);
+```
+
+### Exercise - Practice Your Subqueries!
+
+Write a query that print the name of all phones that have a price greater than any phone made by Samsung.
+
+For reference, here is the phones table:
+
+| name        | manufacturer | price | units_sold |
+|-------------|--------------|-------|------------|
+| N1280       | Nokia        | 199   | 1925       |
+| Iphone 4    | Apple        | 399   | 9436       |
+| Galaxy S    | Samsung      | 299   | 2359       |
+| S5620 Monte | Samsung      | 250   | 2385       |
+| N8          | Nokia        | 150   | 7543       |
+| Droid       | Motorola     | 150   | 8395       |
+| Wave S8500  | Samsung      | 175   | 9259       |
