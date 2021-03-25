@@ -442,3 +442,134 @@ For reference, here is the phones table:
 | N8          | Nokia        | 150   | 7543       |
 | Droid       | Motorola     | 150   | 8395       |
 | Wave S8500  | Samsung      | 175   | 9259       |
+
+### Probably Too Much About Correlated Subqueries
+
+One last topic about subqueries. Something called a correlated subquery.
+
+__Show the name, department, and price of the most expensive product in each department.__
+
+Now when you first look at this problem, it might look easy to solve, but as you look as it, you'll realize it's more difficult.
+
+First we need to find all unique departments. We would then find the most expensive product for each department, dropping the other rows for that department. So that is what we are going for. See each department one time, and that row should have the most expensive price. Let's write out a quick subquery.
+
+Outside query:
+```
+SELECT name, department, price
+FROM products
+WHERE price ___ ___
+```
+
+Subquery:
+```sql
+SELECT MAX(price)
+FROM products
+WHERE department = 'Industrial'
+```
+
+Note that department is hardcoded, but let's just see how it works for now. 
+
+How Where Clause works.
+Goal of `FROM` some number of rows to iterate over. All the rows are then fed into and iterated over with `WHERE`.
+
+Think about outside qery. We have this row come in and the `WHERE` gets executed. Second row come in, `WHERE` gets executed. And so on.
+
+When we get a row, the subquery gets executed. It itself might fetch some number rows, and then execute `WHERE` for every row in the subquery that's been fetched. 
+
+You can imagine this as a double nested for loop. For every row in the outer query, we are going to iterate over rows in the subquery.
+
+I'm going to make a change to both queries;
+
+Outside query:
+```
+SELECT name, department, price
+FROM products AS p1
+WHERE price ___ ___
+```
+
+Subquery:
+```sql
+SELECT MAX(price)
+FROM products AS p2
+WHERE p2.department = 'Industrial'
+```
+
+We are just being very explicit with `p2.department`. `p1.price` is talking that cell right there, and `p2.department` is really talking about this value. Distinct cells by making use of aliases.
+
+Last thing to understand correlated query. Think of this as a double nested for loop. We still have this p1 row out here. We can refer to values from this outer row in p1 from the subquery.
+
+We could do this:
+```sql
+SELECT MAX(price)
+FROM products AS p2
+WHERE p2.department = p1.department
+```
+
+And it's going to iterate over all the products rows in the subquery and only keep them if the match the department in p1. So we have 3 rows for the Industrial department, and then we get drop 2 rows and get 876 for the very first row in p1.
+
+So we for the outer query we'd want it to be `WHERE p1.price = 876` where `876` is in place of the subquery.
+
+So this will be the final query:
+```sql
+SELECT name, department, price
+FROM products AS p1
+WHERE p1.price = (
+  SELECT MAX(price)
+  FROM products AS p2
+  WHERE p1.department = p2.department
+);
+```
+
+So that is a correlated subquery. A correlated subquery means that we are referring to some row from the outside query in the inner query or in the subquery.
+
+### A Select Without a From?
+
+We can place the `SELECT` keyword and any subquery that returns one single value.
+
+```sql
+SELECT (
+  SELECT MAX(price) FROM products
+);
+```
+
+This is useful if you're trying to calculate one single value that is the result of several single values. Quick example. Find the ratio of the maximum priced item to the lowest price item. We could do this:
+
+```sql
+SELECT (
+  SELECT MAX(price) FROM products
+) / (
+  SELECT MIN(price) FROM products
+);
+```
+
+We can also do this:
+```sql
+SELECT (
+  SELECT MAX(price) FROM products
+), (
+  SELECT MIN(price) FROM products
+);
+```
+
+### Exercise - From-less Selects
+
+Using only subqueries, print the max price, min price, and average price of all phones.  Rename each column to `max_price`, `min_price`, `avg_price`.
+
+The result should look something like this:
+
+| max_price | min_price | avg_price |
+|-----------|-----------|-----------|
+| ...       | ...       | ...       |
+
+For reference, here is the phones table:
+
+| name        | manufacturer | price | units_sold |
+|-------------|--------------|-------|------------|
+| N1280       | Nokia        | 199   | 1925       |
+| Iphone 4    | Apple        | 399   | 9436       |
+| Galaxy S    | Samsung      | 299   | 2359       |
+| S5620 Monte | Samsung      | 250   | 2385       |
+| N8          | Nokia        | 150   | 7543       |
+| Droid       | Motorola     | 150   | 8395       |
+| Wave S8500  | Samsung      | 175   | 9259       |
+
