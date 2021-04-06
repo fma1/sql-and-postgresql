@@ -18,7 +18,7 @@ Recursive CTEs and Materialized Views add major functionality.
 
 ### Grouping By Week
 
-1[Grouping By Week Tables](images/grouping_by_week_tables.PNG)
+![Grouping By Week Tables](images/grouping_by_week_tables.PNG)
 
 __For each week, show the number of likes that posts and comments received. Use the post and comment `created_at date, not when the like was received.__
 
