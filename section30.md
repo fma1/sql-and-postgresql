@@ -6,7 +6,7 @@ We're going to discuss transactions. Every single piece of documentation uses th
 
 I want to imagine we are working on a database for a bank rather than an instagram database. So one thing we'd need to do in a banking application is transfer money from one account to another. Let's say we'd need to transfer money from Alyson to Gia. In real life, Alyson would just hand money to Gia but we can't do that in a database.
 
-![Transfer Money From Alyson to Gia in Database](imageees/transfer_money_alyson_gia.png)
+![Transfer Money From Alyson to Gia in Database](images/transfer_money_alyson_gia.png)
 
 So we might break up the transfer into one statement that subtracts money from Alyson's account and a 2nd statement that adds $50 to Gia's account. This seems simple enough, but there are actually issues that can give us trouble.
 
