@@ -77,3 +77,138 @@ All done with the review, your boss goes back to running the current latest vers
 
 __Big Lesson #2__
 When working with other engineers, we need a _really_ easy way to tie the structure of our database to our code
+
+### Migration Files
+
+So at this point, we've made all changes inside of pgAdmin. Moving forward, we're going to use Schema Migration File.
+
+A __Schema Migration File__ is Code that describes a precise change to make to the database.
+
+You can author a Migration File with Javascript, Python, etc.
+
+A 
+
+                               
+
+-------------------------------------------------------------------------
+|                            Migration File                             |
+-------------------------------------------------------------------------
+| Up                               | Down                               |
+|----------------------------------|------------------------------------|
+| ALTER TABLE comments<br />RENAME COLUMN comments TO body; | ALTER TABLE comments<br />RENAME COLUMN body TO comments; |
+
+* __Up__ contains a statement that advances/upgrades the structure of the DB
+* __Down__ contains a statement that __exactly undos__ the 'up' command
+
+So the Up and Down commands of a Migration File allow you to apply a certain migration but also revert that certain migration.
+
+The nice thing about migration files is you might write out a migration file for creating a `comments` table. You might write a 2nd migration file for renaming `contents` to `body`. You can take a bunch of migration files and hand them off to a brand-new engineer at your company and they can just run them.
+
+### Issues Solved By Migrations
+
+So we had two big lessons:
+* Changes to the DB structure and changes to clients need to be made at precisely the same time
+* When working with other engineers, we need a _really_ easy way to tie the structure of our database to our code
+
+Let's see how migrations solve these issues.
+
+Whenever we do a deployment, we might start to deploy our code. Process takes several mnutes.
+
+Problem #1;
+
+As soon as new version of code is ready to start receiving traffic, we can run all available migrations with a script and then the DB structure is update. So then we'd start we'd receiving traffic and it'd shrink the window of time that we'd get errors because of the DB and API code not being in a sync.
+
+Problem #2;
+
+In every code review request, we can pair it along with a migration file that describes the exact changes to DB structure. So the other engineer applies the migration gets the correct structure of the DB, then evaluates the code and completes the review. And then they revert the migration and that would take them back to the current real structure of the DB. 
+
+---
+
+Now this doesn't solve all issues, but it solves these two big issues.
+
+### A Few Notes on Migration Libraries
+
+You can write Schema migrations in any language
+
+Javascript:
+* node-pg-migrate
+* typeorm
+* sequelize
+* db-migrate
+
+Java
+* flywaydb
+
+Python
+* alemba
+
+Go
+* golang-migrate
+* go-pg
+
+So we're going to be using Javascript to write a Schema migration. So we're going to be using node-pg-migrate.
+
+Many migration tools can __automatically generate migrations for you__. I highly highly recommend you write all migrations manually using plain SQL.
+
+### Project Creation
+
+```
+mkdir ig
+cd ig
+npm init -y
+npm install node-pg-migrate pg
+```
+
+We're going to generate a new database called `socialnetwork`. We're then going to write out 2 migrations for it. Trying to create a new table called `comments`. Second migration rename column `contents` to `body`. Not directly working with data.
+
+### Generating and Writing Migrations
+
+In pgAdmin, we'll create the `socialnetwork` database.
+
+We're going to open up package.json:
+```
+"scripts": {
+  "migrate": "node-pg-migrate"
+},
+```
+
+Now we're going to run
+`npm run migrate create table comments`
+
+Now we're going to edit the created file in the migrations directory.
+
+### Applying and Reverting Migrations
+
+__`DATABASE_URL` Environment Variable__
+* `postgres://` `USERNAME` `:` `PASSWORD` `@localhost:5432/socialnetwork`
+
+__MacOS with Postgress.app__
+* username = your username (type `whoami` in terminal)
+* password = none
+
+__Windows__
+* username = postgres
+* password = the password you set this whole time you installed PG
+
+In Git Bash:
+`DATABASE_URL=postgres://postgres:PASSWORD@localhost:5342/socialnetwork npm run migrate up`
+
+So if we go to pgAdmin, we see that the `comments` table is there. And we see there is a `pgmigrations` table where node-pg-migrate keeps track of migrations. If we run the migration again, we would get an error due to that table.
+
+If we wanted to revert the changes we can run this:
+`DATABASE_URL=postgres://postgres:PASSWORD@localhost:5342/socialnetwork npm run migrate down`
+
+Now if we go to pgAdmin again, the table is gone.
+
+### Generationg a Second Migration
+
+So to create a second migration, let's do this:
+`npm run migrate create rename contents to body`
+
+Now we'll open the new generated file in our editor. We'll fill out the up first and down afterwards.
+
+Now we can run the migration script up and down and check pgAdmin.
+
+We are talking about changing the structure of database. We haven't talked about changing data as well. We might change the data type of a column. That's definitely an open point to think about.
+
+I also want to think about how to use this to have 0% downtime. 
