@@ -1,7 +1,6 @@
 {
   "name": "social-repo",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "migrate": "node-pg-migrate",
@@ -19,5 +18,7 @@
     "pg": "^8.5.1",
     "pg-format": "^1.0.4",
     "supertest": "^6.1.3"
-  }
+  },
+  "devDependencies": {},
+  "description": ""
 }
