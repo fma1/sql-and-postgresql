@@ -3,9 +3,10 @@ const pg = require('pg');
 class Pool {
   _pool = null;
   
-  create(options) {
+  connect(options) {
     this._pool = new pg.Pool(options);
+    return this._pool.query('SELECT 1 + 1;')
   }
 }
 
-modules.exports = new Pool();
+module.exports = new Pool();
