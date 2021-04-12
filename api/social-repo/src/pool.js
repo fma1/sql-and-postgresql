@@ -12,9 +12,8 @@ class Pool {
     this._pool.end();
   }
 
-  // REALLY BIG SECURITY ISSUE NO VALIDATION
   query(sql) {
-    return this._pool.query(sql);
+    return this._pool.query(sql, params);
   }
 }
 
